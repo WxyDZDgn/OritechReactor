@@ -1,11 +1,13 @@
-package entity.reactor;
+package org.whania.block.entity.reactor;
 
-import block.Block;
-import blocks.reactor.*;
-import init.Config;
-import util.Pair;
-import util.SimpleEnergyStorage;
-import util.Vector2i;
+import org.joml.Vector2i;
+import org.whania.block.AirBlock;
+import org.whania.block.Block;
+import org.whania.block.blocks.reactor.*;
+import org.whania.init.Config;
+import org.whania.util.energy.containers.SimpleEnergyStorage;
+
+import org.whania.util.MyPair;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,8 +51,33 @@ public class ReactorControllerBlockEntity {
 		}
 		enable();
 	}
+// ' ', S, P, V, R, 1, 2, 4
 
-	public Pair<List<Pair<Vector2i, ComponentStatistics>>, Long> tick() {
+	public ReactorControllerBlockEntity(String[] grid) {
+		for(int i = 0; i < grid.length; i++) {
+			var v = grid[i];
+			for(int j = 0; j < v.length(); j++) {
+				var block = switch(v.charAt(j)) {
+					case 'S' -> ReactorAbsorberBlock.INSTANCE;
+					case 'P' -> ReactorHeatPipeBlock.INSTANCE;
+					case 'V' -> ReactorHeatVentBlock.INSTANCE;
+					case 'R' -> ReactorReflectorBlock.INSTANCE;
+					case '1' -> ReactorRodBlock.REACTOR_ROD;
+					case '2' -> ReactorRodBlock.REACTOR_DOUBLE_ROD;
+					case '4' -> ReactorRodBlock.REACTOR_QUAD_ROD;
+					default -> AirBlock.INSTANCE;
+				};
+
+				if(block instanceof BaseReactorBlock baseReactorBlock) {
+					activeComponents.putIfAbsent(new Vector2i().add(i, j), baseReactorBlock);
+					componentHeats.putIfAbsent(new Vector2i().add(i, j), 0);
+				}
+			}
+		}
+		enable();
+	}
+
+	public MyPair<List<MyPair<Vector2i, ComponentStatistics>>, Long> tick() {
 
 		if(!active || activeComponents.isEmpty()) return null;
 
@@ -185,13 +212,13 @@ public class ReactorControllerBlockEntity {
 		return res;
 	}
 
-	public Pair<List<Pair<Vector2i, ComponentStatistics>>, Long> sendUINetworkData() {
+	public MyPair<List<MyPair<Vector2i, ComponentStatistics>>, Long> sendUINetworkData() {
 
 		if(!active || activeComponents.isEmpty()) return null;
 
 		var positionsFlat = activeComponents.keySet();
-		return new Pair<>(
-				positionsFlat.stream().map(pos -> new Pair<>(
+		return new MyPair<>(
+				positionsFlat.stream().map(pos -> new MyPair<>(
 						pos, componentStats.getOrDefault(pos, ComponentStatistics.EMPTY))).toList(),
 				energyStorage.getAmount()
 		);

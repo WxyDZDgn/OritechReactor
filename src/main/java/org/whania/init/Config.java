@@ -1,4 +1,4 @@
-package init;
+package org.whania.init;
 
 public class Config {
 	public static final int rfPerPulse = 64;

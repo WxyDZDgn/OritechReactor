@@ -1,4 +1,4 @@
-package blocks.reactor;
+package org.whania.block.blocks.reactor;
 
 public class ReactorRodBlock extends BaseReactorBlock {
 	public static final ReactorRodBlock REACTOR_ROD_WITHOUT_FUEL = new ReactorRodBlock(1, 1, false);
